@@ -1,0 +1,22 @@
+{
+  "name": "geo-map",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ADJMLyon/MOS5.5.git"
+  },
+  "author": "Antonio De Jesus Montez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ADJMLyon/MOS5.5/issues"
+  },
+  "homepage": "https://github.com/ADJMLyon/MOS5.5#readme",
+  "dependencies": {
+    "d3": "^4.13.0",
+    "express": "^4.16.2"
+  }

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="/d3"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    .tooltip {
+      position: absolute;
+      width: 200px;
+      height: 50px;
+      pointer-events: none;
+      background-color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+		let width = 700,
+  		  height = 580;
+
+		let svg = d3.select( "body" )
+  		.append( "svg" )
+		  .attr( "width", width )
+		  .attr( "height", height );
+
+    // setup fill color
+    let cValue = d => { return d.properties.value;},
+    color = d3.scaleThreshold()
+    .domain([0, 750, 1500, 2250, 3000])
+    .range(["#f2f0f7", "#dadaeb", "#bcbddc", "#9e9ac8", "#756bb1", "#54278f"]);
+
+    let projection = d3.geoConicConformal().center([2.454071, 46.279229]).scale(2800)
+    			.translate([width/2, height/2])
+
+    let path = d3.geoPath().projection(projection);
+
+    // add the tooltip area to the webpage
+    var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+    d3.csv("GrippeFrance2014.csv", data => {
+
+      d3.json("regions.json", json => {
+
+        let grippeData = [];
+
+        // On fusionne les donnees avec le GeoJSON des regions
+        for (var i = 0; i < data.length; i++) {
+          json.features.forEach( region => {
+            if (region.properties.nom == data[i].region) {
+              region.properties.value = parseFloat(data[i].somme2014);
+            }
+          });
+        }
+
+        svg.selectAll("path")
+        .data(json.features)
+        .enter()
+        .append("path")
+        .attr("d", path)
+        .style("fill", d => {
+          return color(cValue(d));
+        })
+        .on("mouseover", d => {
+          tooltip.transition()
+          .duration(200)
+          .style("opacity", .9);
+          tooltip.html(`<b>${d.properties.nom}<br/>${typeof cValue(d) === 'undefined' ? "No data for this area": cValue(d)}</b>`)
+          .style("left", (d3.event.pageX + 5) + "px")
+          .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", d => {
+          tooltip.transition()
+          .duration(500)
+          .style("opacity", 0);
+        });
+
+        // draw legend
+        var legend = svg.selectAll(".legend")
+        .data(color.domain())
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => { return "translate(0," + i * 20 + ")"; });
+
+        // draw legend colored rectangles
+        legend.append("rect")
+        .attr("x", width - 18)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", color);
+
+        // draw legend text
+        legend.append("text")
+        .attr("x", width - 24)
+        .attr("y", 9)
+        .attr("dy", ".35em")
+        .style("text-anchor", "end")
+        .text(d => { return d;})
+
+      });
+    });
+  </script>
+</body>
